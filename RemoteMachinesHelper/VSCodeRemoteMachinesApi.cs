@@ -24,6 +24,9 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
                 var results = new List<VSCodeRemoteMachine>();
                 var totalMachines = 0;
 
+                // 使用 HashSet 避免重复处理同一个 SSH 配置文件
+                var processedSshConfigFiles = new HashSet<string>();
+
                 foreach (var vscodeInstance in VSCodeInstances.Instances)
                 {
                     var instanceName = vscodeInstance.VSCodeVersion.ToString();
@@ -47,24 +50,29 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
 
                                 if (File.Exists(path))
                                 {
-                                    var instanceMachinesCount = 0;
-                                    foreach (SshHost h in SshConfig.ParseFile(path))
+                                    // 避免重复读取同一个文件
+                                    if (!processedSshConfigFiles.Contains(path))
                                     {
-                                        var machine = new VSCodeRemoteMachine();
-                                        machine.Host = h.Host;
-                                        machine.VSCodeInstance = vscodeInstance;
-                                        machine.HostName = h.HostName != null ? h.HostName : string.Empty;
-                                        machine.User = h.User != null ? h.User : string.Empty;
+                                        processedSshConfigFiles.Add(path);
+                                        var instanceMachinesCount = 0;
+                                        foreach (SshHost h in SshConfig.ParseFile(path))
+                                        {
+                                            var machine = new VSCodeRemoteMachine();
+                                            machine.Host = h.Host;
+                                            machine.VSCodeInstance = vscodeInstance;
+                                            machine.HostName = h.HostName != null ? h.HostName : string.Empty;
+                                            machine.User = h.User != null ? h.User : string.Empty;
 
-                                        results.Add(machine);
-                                        instanceMachinesCount++;
-                                    }
+                                            results.Add(machine);
+                                            instanceMachinesCount++;
+                                        }
 
-                                    if (instanceMachinesCount > 0)
-                                    {
-                                        totalMachines += instanceMachinesCount;
-                                        Main.Context.API.LogInfo("VSCodeRemoteMachines",
-                                            $"[{instanceName}] 从 SSH 配置文件 ({path}) 读取了 {instanceMachinesCount} 个远程机器");
+                                        if (instanceMachinesCount > 0)
+                                        {
+                                            totalMachines += instanceMachinesCount;
+                                            Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                                                $"[{instanceName}] 从 SSH 配置文件 ({path}) 读取了 {instanceMachinesCount} 个远程机器");
+                                        }
                                     }
                                 }
                                 else
@@ -76,7 +84,7 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
                             else
                             {
                                 Main.Context.API.LogInfo("VSCodeRemoteMachines",
-                                    $"[{instanceName}] settings.json 中未找到 remote.SSH.configFile 配置");
+                                    $"[{instanceName}] settings.json 中未找到 remote.SSH.configFile 配置，尝试使用默认路径");
                             }
                         }
                         catch (Exception ex)
@@ -89,6 +97,43 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
                     {
                         Main.Context.API.LogInfo("VSCodeRemoteMachines",
                             $"[{instanceName}] settings.json 不存在: {vscode_settings}");
+                    }
+                }
+
+                // 如果没有找到任何配置的 SSH 配置文件，尝试默认路径
+                if (processedSshConfigFiles.Count == 0)
+                {
+                    var defaultSshConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh", "config");
+                    Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                        $"未找到任何配置的 SSH 配置文件，尝试默认路径: {defaultSshConfigPath}");
+
+                    if (File.Exists(defaultSshConfigPath))
+                    {
+                        processedSshConfigFiles.Add(defaultSshConfigPath);
+                        var defaultMachinesCount = 0;
+                        foreach (SshHost h in SshConfig.ParseFile(defaultSshConfigPath))
+                        {
+                            var machine = new VSCodeRemoteMachine();
+                            machine.Host = h.Host;
+                            machine.VSCodeInstance = VSCodeInstances.Instances.FirstOrDefault(); // 使用第一个可用的 VSCode 实例
+                            machine.HostName = h.HostName != null ? h.HostName : string.Empty;
+                            machine.User = h.User != null ? h.User : string.Empty;
+
+                            results.Add(machine);
+                            defaultMachinesCount++;
+                        }
+
+                        if (defaultMachinesCount > 0)
+                        {
+                            totalMachines += defaultMachinesCount;
+                            Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                                $"从默认 SSH 配置文件 ({defaultSshConfigPath}) 读取了 {defaultMachinesCount} 个远程机器");
+                        }
+                    }
+                    else
+                    {
+                        Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                            $"默认 SSH 配置文件不存在: {defaultSshConfigPath}");
                     }
                 }
 

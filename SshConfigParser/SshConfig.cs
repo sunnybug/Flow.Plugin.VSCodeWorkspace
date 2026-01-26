@@ -25,17 +25,33 @@ namespace Flow.Plugin.VSCodeWorkspaces.SshConfigParser
             var list = new List<SshHost>();
             foreach (Match match in _sshConfig.Matches(str))
             {
+                // 跳过不成功的匹配
+                if (!match.Success)
+                {
+                    continue;
+                }
+
                 var sshHost = new SshHost();
-                string content = match.Groups.Values.ToList()[0].Value;
+                // 使用 Groups[1] 获取第一个捕获组，如果不存在则使用整个匹配内容
+                var groupsList = match.Groups.Values.ToList();
+                string content = groupsList.Count > 0 ? groupsList[0].Value : match.Value;
+
                 foreach (Match match1 in _keyValue.Matches(content))
                 {
                     var split = match1.Value.Split(" ");
-                    var key = split[0];
-                    var value = split[1];
-                    sshHost.Properties[key] = value;
+                    if (split.Length >= 2)
+                    {
+                        var key = split[0];
+                        var value = split[1];
+                        sshHost.Properties[key] = value;
+                    }
                 }
 
-                list.Add(sshHost);
+                // 只有当 Host 属性存在时才添加到列表
+                if (!string.IsNullOrEmpty(sshHost.Host))
+                {
+                    list.Add(sshHost);
+                }
             }
 
             return list;

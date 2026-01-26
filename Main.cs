@@ -39,22 +39,32 @@ namespace Flow.Plugin.VSCodeWorkspaces
             var workspaces = new List<VsCodeWorkspace>();
 
             // User defined extra workspaces
+            var customWorkspaceCount = 0;
             if (_defaultInstance != null)
             {
-                workspaces.AddRange(_settings.CustomWorkspaces.Select(uri =>
-                    VSCodeWorkspacesApi.ParseVSCodeUri(uri, _defaultInstance)));
+                var customWorkspaces = _settings.CustomWorkspaces.Select(uri =>
+                    VSCodeWorkspacesApi.ParseVSCodeUri(uri, _defaultInstance)).ToList();
+                customWorkspaceCount = customWorkspaces.Count(w => w != null);
+                workspaces.AddRange(customWorkspaces);
             }
 
             // Search opened workspaces
+            var discoveredWorkspaceCount = 0;
             if (_settings.DiscoverWorkspaces)
             {
-                workspaces.AddRange(_workspacesApi.Workspaces);
+                var discoveredWorkspaces = _workspacesApi.Workspaces;
+                discoveredWorkspaceCount = discoveredWorkspaces.Count;
+                workspaces.AddRange(discoveredWorkspaces);
             }
 
             // Simple de-duplication
-            results.AddRange(workspaces.Distinct()
-                .Select(CreateWorkspaceResult)
-            );
+            var distinctWorkspaces = workspaces.Distinct().ToList();
+            results.AddRange(distinctWorkspaces.Select(CreateWorkspaceResult));
+
+            // 输出汇总日志
+            Context.API.LogInfo("VSCodeWorkspaces",
+                $"数据汇总: 自定义工作区={customWorkspaceCount}, 发现的工作区={discoveredWorkspaceCount}, " +
+                $"去重后={distinctWorkspaces.Count}, 远程机器={(_settings.DiscoverMachines ? _machinesApi.Machines.Count : 0)}");
 
             // Search opened remote machines
             if (_settings.DiscoverMachines)

@@ -22,11 +22,13 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
             get
             {
                 var results = new List<VSCodeRemoteMachine>();
+                var totalMachines = 0;
 
                 foreach (var vscodeInstance in VSCodeInstances.Instances)
                 {
+                    var instanceName = vscodeInstance.VSCodeVersion.ToString();
                     // settings.json contains path of ssh_config
-                    var vscode_settings = Path.Combine(vscodeInstance.AppData, "User\\settings.json");
+                    var vscode_settings = Path.Combine(vscodeInstance.AppData, "User", "settings.json");
 
                     if (File.Exists(vscode_settings))
                     {
@@ -45,6 +47,7 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
 
                                 if (File.Exists(path))
                                 {
+                                    var instanceMachinesCount = 0;
                                     foreach (SshHost h in SshConfig.ParseFile(path))
                                     {
                                         var machine = new VSCodeRemoteMachine();
@@ -54,8 +57,26 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
                                         machine.User = h.User != null ? h.User : string.Empty;
 
                                         results.Add(machine);
+                                        instanceMachinesCount++;
+                                    }
+
+                                    if (instanceMachinesCount > 0)
+                                    {
+                                        totalMachines += instanceMachinesCount;
+                                        Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                                            $"[{instanceName}] 从 SSH 配置文件 ({path}) 读取了 {instanceMachinesCount} 个远程机器");
                                     }
                                 }
+                                else
+                                {
+                                    Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                                        $"[{instanceName}] SSH 配置文件不存在: {path}");
+                                }
+                            }
+                            else
+                            {
+                                Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                                    $"[{instanceName}] settings.json 中未找到 remote.SSH.configFile 配置");
                             }
                         }
                         catch (Exception ex)
@@ -64,6 +85,17 @@ namespace Flow.Plugin.VSCodeWorkspaces.RemoteMachinesHelper
                             Main.Context.API.LogException("VSCodeWorkSpaces", message, ex);
                         }
                     }
+                    else
+                    {
+                        Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                            $"[{instanceName}] settings.json 不存在: {vscode_settings}");
+                    }
+                }
+
+                if (totalMachines > 0)
+                {
+                    Main.Context.API.LogInfo("VSCodeRemoteMachines",
+                        $"总共从 {VSCodeInstances.Instances.Count} 个 VSCode 实例读取了 {totalMachines} 个远程机器");
                 }
 
                 return results;

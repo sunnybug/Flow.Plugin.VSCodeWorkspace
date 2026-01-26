@@ -11,3 +11,9 @@ Remote Workspace (WSL/SSH) are also supported.
 Hope you enjoy it!
 
 The original source code is from [Microsoft Powertoys](https://github.com/microsoft/PowerToys/tree/main/src/modules/launcher/Plugins/Community.PowerToys.Run.Plugin.VSCodeWorkspaces).
+
+## 更新日志
+
+### v2.0.1 (2025-01-26)
+- 添加详细的调试日志，帮助诊断工作区扫描问题
+- 改进日志输出，包括 VSCode 实例扫描、AppData 路径、数据库查询结果等信息

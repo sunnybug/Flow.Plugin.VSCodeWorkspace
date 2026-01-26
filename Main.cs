@@ -71,7 +71,7 @@ namespace Flow.Plugin.VSCodeWorkspaces
             {
                 _machinesApi.Machines.ForEach(a =>
                 {
-                    var title = $"{a.Host}";
+                    var title = $"SSH: {a.Host}";
 
                     if (!string.IsNullOrEmpty(a.User) && !string.IsNullOrEmpty(a.HostName))
                     {

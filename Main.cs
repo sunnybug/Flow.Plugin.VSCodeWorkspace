@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -164,18 +164,19 @@ namespace Flow.Plugin.VSCodeWorkspaces
                             return true;
                         }
 
+                        var argumentPrefix = ws.WorkspaceType == WorkspaceType.Workspace
+                            ? "--file-uri"
+                            : "--folder-uri";
+
+                        var arguments = $"{argumentPrefix} \"{ws.Path}\"";
+
                         var process = new ProcessStartInfo
                         {
                             FileName = ws.VSCodeInstance.ExecutablePath,
                             UseShellExecute = true,
+                            Arguments = arguments,
                             WindowStyle = ProcessWindowStyle.Hidden,
                         };
-
-                        process.ArgumentList.Add(ws.WorkspaceType == WorkspaceType.Workspace
-                            ? "--file-uri"
-                            : "--folder-uri");
-
-                        process.ArgumentList.Add(ws.Path);
 
                         Process.Start(process);
                         return true;

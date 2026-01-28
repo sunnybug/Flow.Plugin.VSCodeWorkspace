@@ -3,7 +3,7 @@
   "Description": "Opens workspaces, remote machines (SSH or Codespaces) and containers, previously opened in VS Code.",
   "ActionKeyword": "{",
   "Name": "VS Code Workspaces",
-  "Author": "ricardosantos9521, MaskedRPGFan",
+  "Author": "ricardosantos9521, MaskedRPGFan, xsw",
   "Version": "2.0.1",
   "Language": "csharp",
   "Website": "https://github.com/taooceros/Flow.Plugin.VSCodeWorkspace",

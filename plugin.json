@@ -6,7 +6,7 @@
   "Author": "ricardosantos9521, MaskedRPGFan, xsw",
   "Version": "2.0.1",
   "Language": "csharp",
-  "Website": "https://github.com/taooceros/Flow.Plugin.VSCodeWorkspace",
+  "Website": "https://github.com/sunnybug/Flow.Plugin.VSCodeWorkspace",
   "ExecuteFileName": "Flow.Plugin.VSCodeWorkspaces.dll",
   "IsGlobal": false,
   "IcoPath": "Images\\code-light.png"

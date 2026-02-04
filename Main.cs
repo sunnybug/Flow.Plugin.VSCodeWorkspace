@@ -123,7 +123,14 @@ namespace Flow.Plugin.VSCodeWorkspaces
             {
                 results = results.Where(r =>
                 {
-                    r.Score = Context.API.FuzzySearch(query.Search, r.Title).Score;
+                    var matchResult = Context.API.FuzzySearch(query.Search, r.Title);
+                    r.Score = matchResult.Score;
+                    // 当模糊搜索得分为 0 时，用子串匹配兜底（例如 "kr1" 匹配 "43.128.131.41-proxy-kr1"）
+                    if (r.Score == 0 && !string.IsNullOrWhiteSpace(query.Search) &&
+                        r.Title.Contains(query.Search, StringComparison.OrdinalIgnoreCase))
+                    {
+                        r.Score = 1;
+                    }
                     return r.Score > 0;
                 }).ToList();
             }

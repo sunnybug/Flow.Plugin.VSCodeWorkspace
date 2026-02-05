@@ -6,7 +6,7 @@
 		<RootNamespace>Flow.Plugin.VSCodeWorkspaces</RootNamespace>
 		<AssemblyName>Flow.Plugin.VSCodeWorkspaces</AssemblyName>
 		<OutputType>Library</OutputType>
-		<Version>2.0.1</Version>
+		<Version>0.0.0</Version>
 		<UseWpf>true</UseWpf>
 		<Platforms>x64</Platforms>
 		<AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
@@ -75,5 +75,18 @@
 		<None Update="Images\code-light.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Images\code-stable.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
+	<Target Name="SetVersionFromPluginJson" BeforeTargets="BeforeBuild">
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\scripts\get_plugin_version.ps1&quot; -PluginJsonPath &quot;$(MSBuildProjectDirectory)\plugin.json&quot; -OutputPath &quot;$(BaseIntermediateOutputPath)plugin_version.txt&quot;" />
+		<ReadLinesFromFile File="$(BaseIntermediateOutputPath)plugin_version.txt">
+			<Output TaskParameter="Lines" ItemName="_VersionLine" />
+		</ReadLinesFromFile>
+		<PropertyGroup>
+			<Version>@(_VersionLine)</Version>
+		</PropertyGroup>
+		<Delete Files="$(BaseIntermediateOutputPath)plugin_version.txt" />
+	</Target>
 </Project>

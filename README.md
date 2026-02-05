@@ -1,8 +1,10 @@
 ## 主要功能
 - 快速打开Visual Studio Code工作区
+
 ![演示截图](doc/vsc.png)
 
 - 快速打开SSH远程机器工作区
+
 ![演示截图](doc/vsc-ssh.png)
 
 ## 相对于旧版本的差异

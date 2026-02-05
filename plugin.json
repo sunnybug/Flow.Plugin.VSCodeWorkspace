@@ -4,7 +4,7 @@
   "ActionKeyword": "{",
   "Name": "VS Code Workspaces",
   "Author": "ricardosantos9521, MaskedRPGFan, xsw",
-  "Version": "2.0.1",
+  "Version": "2.0.2",
   "Language": "csharp",
   "Website": "https://github.com/sunnybug/Flow.Plugin.VSCodeWorkspace",
   "ExecuteFileName": "Flow.Plugin.VSCodeWorkspaces.dll",

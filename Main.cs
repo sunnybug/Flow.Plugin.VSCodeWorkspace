@@ -13,6 +13,7 @@ namespace Flow.Plugin.VSCodeWorkspaces
     using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
+    using System.Runtime.Versioning;
     using System.Windows.Controls;
     using VSCodeHelper;
     using WorkspacesHelper;
@@ -201,12 +202,15 @@ namespace Flow.Plugin.VSCodeWorkspaces
             };
         }
 
+        [SupportedOSPlatform("windows")]
         public void Init(PluginInitContext context)
         {
             Context = context;
             _settings = context.API.LoadSettingJsonStorage<Settings>();
 
+#pragma warning disable CA1416 // Init 仅在 Windows 上被调用，与 LoadVSCodeInstances 一致
             VSCodeInstances.LoadVSCodeInstances();
+#pragma warning restore CA1416
 
             // Prefer stable version, or the first one we got
             _defaultInstance = VSCodeInstances.Instances.Find(e => e.VSCodeVersion == VSCodeVersion.Stable) ??

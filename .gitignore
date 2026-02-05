@@ -4,4 +4,6 @@
 bin/
 obj/
 Output/
+# dotnet publish 输出目录
+publish/
 install.nu

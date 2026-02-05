@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Windows.Media.Imaging;
 
 namespace Flow.Plugin.VSCodeWorkspaces.VSCodeHelper
@@ -22,6 +23,7 @@ namespace Flow.Plugin.VSCodeWorkspaces.VSCodeHelper
 
         public static List<VSCodeInstance> Instances { get; set; } = new();
 
+        [SupportedOSPlatform("windows")]
         private static BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
         {
             using (var memory = new MemoryStream())
@@ -40,6 +42,7 @@ namespace Flow.Plugin.VSCodeWorkspaces.VSCodeHelper
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private static Bitmap BitmapOverlayToCenter(Bitmap bitmap1, Bitmap overlayBitmap)
         {
             int bitmap1Width = bitmap1.Width;
@@ -109,6 +112,7 @@ namespace Flow.Plugin.VSCodeWorkspaces.VSCodeHelper
         }
 
         // Gets the executablePath and AppData foreach instance of VSCode
+        [SupportedOSPlatform("windows")]
         public static void LoadVSCodeInstances()
         {
             if (_systemPath == Environment.GetEnvironmentVariable("PATH"))
